@@ -64,8 +64,13 @@ typedef enum {
 
 typedef enum {
 	MODE_IMAGE,
-	MODE_THUMB
+	MODE_THUMB,
 } appmode_t;
+
+typedef enum {
+	MODE_VIEW,
+	MODE_PROMPT
+} usemode_t;
 
 typedef enum {
 	DIR_LEFT  = 1,
@@ -285,6 +290,7 @@ struct opt {
 	bool thumb_mode;
 	bool clean_cache;
 	bool private_mode;
+	bool prompt_mode;
 };
 
 extern const opt_t *options;

@@ -71,8 +71,9 @@ void parse_options(int argc, char **argv)
 	_options.thumb_mode = false;
 	_options.clean_cache = false;
 	_options.private_mode = false;
+	_options.prompt_mode = false;
 
-	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opqrS:s:tvZz:")) != -1) {
+	while ((opt = getopt(argc, argv, "A:abce:fG:g:hin:N:opPqrS:s:tvZz:")) != -1) {
 		switch (opt) {
 			case '?':
 				print_usage();
@@ -126,6 +127,10 @@ void parse_options(int argc, char **argv)
 				_options.res_name = optarg;
 				break;
 			case 'o':
+				_options.to_stdout = true;
+				break;
+			case 'P':
+				_options.prompt_mode = true;
 				_options.to_stdout = true;
 				break;
 			case 'p':

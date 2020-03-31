@@ -48,6 +48,7 @@ void slideshow(void);
 void clear_resize(void);
 
 appmode_t mode;
+usemode_t umode;
 arl_t arl;
 img_t img;
 tns_t tns;
@@ -937,6 +938,9 @@ int main(int argc, char **argv)
 		mode = MODE_IMAGE;
 		tns.thumbs = NULL;
 		load_image(fileidx);
+	}
+	if (options -> prompt_mode){
+		umode = MODE_PROMPT;
 	}
 	win_open(&win);
 	win_set_cursor(&win, CURSOR_WATCH);

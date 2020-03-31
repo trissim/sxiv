@@ -39,6 +39,7 @@ void set_timeout(timeout_f, int, bool);
 void reset_timeout(timeout_f);
 
 extern appmode_t mode;
+extern usemode_t umode;
 extern img_t img;
 extern tns_t tns;
 extern win_t win;
@@ -194,7 +195,12 @@ bool cg_zoom(arg_t d)
 
 bool cg_toggle_image_mark(arg_t _)
 {
-	return mark_image(fileidx, !(files[fileidx].flags & FF_MARK));
+	bool state;
+	state = mark_image(fileidx, !(files[fileidx].flags & FF_MARK));
+	if (umode == MODE_PROMPT){
+		cg_quit(0);
+	}
+	return state;
 }
 
 bool cg_reverse_marks(arg_t _)
