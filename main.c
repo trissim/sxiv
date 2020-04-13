@@ -939,8 +939,9 @@ int main(int argc, char **argv)
 		tns.thumbs = NULL;
 		load_image(fileidx);
 	}
-	if (options -> prompt_mode){
+	if (options->prompt_mode){
 		umode = MODE_PROMPT;
+		win.prompt = true;
 	}
 	win_open(&win);
 	win_set_cursor(&win, CURSOR_WATCH);

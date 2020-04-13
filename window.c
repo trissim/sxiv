@@ -28,7 +28,7 @@
 #include <X11/cursorfont.h>
 #include <X11/Xatom.h>
 #include <X11/Xresource.h>
-
+#include <X11/extensions/Xrandr.h>
 #define RES_CLASS "Sxiv"
 
 enum {
@@ -50,6 +50,8 @@ static XftFont *font;
 static int fontheight;
 static double fontsize;
 static int barheight;
+XSetWindowAttributes attributes; 
+
 
 Atom atoms[ATOM_COUNT];
 
@@ -83,6 +85,42 @@ const char* win_res(XrmDatabase db, const char *name, const char *def)
 		return ret.addr;
 	} else {
 		return def;
+	}
+}
+
+
+void prompt_xy(win_t *win)
+{
+
+	win_env_t *e;
+	e = &win->env;
+	XRRMonitorInfo* active; 
+	int nmons = 1;
+	active = XRRGetMonitors(e->dpy,DefaultRootWindow(e->dpy), true, &nmons);
+	Window window_returned;
+	int win_x, win_y;
+	unsigned int mask_return;
+	int i;
+	int cursor_x;
+	int cursor_y;
+	int t_min_w;
+	int t_max_w;
+	int t_min_h;
+	int t_max_h;
+	for (i = 0; i < nmons ; i++){
+		XQueryPointer(e->dpy, DefaultRootWindow(e->dpy), &window_returned,
+		                &window_returned, &cursor_x, &cursor_y, &win_x, &win_y,
+		                &mask_return);
+		t_max_w = (active[i]).x + (active[i]).width;
+		t_min_w = (active[i]).x;
+		t_max_h = (active[i]).y + (active[i]).height;
+		t_min_h = (active[i]).y;
+		if (cursor_x < t_max_w && cursor_x >= t_min_w && cursor_y < t_max_h && cursor_y >= t_min_h){
+			int width = (active[i]).width;
+			int height = (active[i]).height;
+			win->x = (active[i]).x+(width/2)-(win->w/2);
+			win->y = (active[i]).y+(height/2)-(win->h/2);
+		}
 	}
 }
 
@@ -195,15 +233,31 @@ void win_open(win_t *win)
 		win->y = 0;
 	}
 
-	win->xwin = XCreateWindow(e->dpy, parent,
-	                          win->x, win->y, win->w, win->h, 0,
-	                          e->depth, InputOutput, e->vis, 0, NULL);
+	if (win->prompt){
+		attributes.override_redirect = 1;
+		prompt_xy(win);	
+		win->xwin = XCreateWindow(e->dpy, parent,
+	        	                  win->x, win->y, win->w, win->h, 0,
+	        	                  e->depth, InputOutput, e->vis, CWOverrideRedirect, &attributes);
+	}
+	else{
+		win->xwin = XCreateWindow(e->dpy, parent,
+		                          win->x, win->y, win->w, win->h, 0,
+		                          e->depth, InputOutput, e->vis, 0, 0);
+	}
+	
 	if (win->xwin == None)
 		error(EXIT_FAILURE, 0, "Error creating X window");
+
+	if (win->prompt){
+		XGrabKeyboard(e->dpy, DefaultRootWindow(e->dpy), false, GrabModeAsync, GrabModeAsync, CurrentTime);
+	}
 
 	XSelectInput(e->dpy, win->xwin,
 	             ButtonReleaseMask | ButtonPressMask | KeyPressMask |
 	             PointerMotionMask | StructureNotifyMask);
+	
+
 
 	for (i = 0; i < ARRLEN(cursors); i++) {
 		if (i != CURSOR_NONE)

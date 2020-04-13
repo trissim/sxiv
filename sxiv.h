@@ -421,6 +421,7 @@ struct win {
 	unsigned int w;
 	unsigned int h; /* = win height - bar height */
 	unsigned int bw;
+	bool prompt;
 
 	struct {
 		int w;
